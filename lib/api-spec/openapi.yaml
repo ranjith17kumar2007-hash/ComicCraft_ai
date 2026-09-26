@@ -1,0 +1,139 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: comic
+    description: AI comic generation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /comic/generate:
+    post:
+      operationId: generateComic
+      tags: [comic]
+      summary: Generate an illustrated comic from a story idea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComicGenerateInput"
+      responses:
+        "200":
+          description: Generated comic and illustrated panels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComicGeneration"
+        "400":
+          description: Invalid comic request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Comic generation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ComicGenerateInput:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 80
+        idea:
+          type: string
+          minLength: 10
+          maxLength: 1200
+        panelCount:
+          type: integer
+          minimum: 3
+          maximum: 6
+        artStyle:
+          type: string
+          enum:
+            - Storybook watercolor
+            - Bold ink comic
+            - Soft pastel
+            - Cinematic fantasy
+      required:
+        - title
+        - idea
+        - panelCount
+        - artStyle
+    ComicPanel:
+      type: object
+      properties:
+        sceneTitle:
+          type: string
+        sceneDescription:
+          type: string
+        narration:
+          type: string
+        dialogue:
+          type: string
+        imageDataUrl:
+          type: string
+      required:
+        - sceneTitle
+        - sceneDescription
+        - narration
+        - dialogue
+        - imageDataUrl
+    ComicGeneration:
+      type: object
+      properties:
+        title:
+          type: string
+        logline:
+          type: string
+        artStyle:
+          type: string
+        panels:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComicPanel"
+      required:
+        - title
+        - logline
+        - artStyle
+        - panels
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
